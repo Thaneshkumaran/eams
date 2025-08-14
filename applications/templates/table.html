@@ -1,0 +1,32 @@
+<a href="{% url 'Create_Depart' %}">Add Department</a>
+<table>
+    <tr>
+        <th>dep_id</th>
+        <th>dep name</th>
+        <th >eidit</th>
+        <th>delate</th>
+    </tr>
+    {%for data in data%}
+    <tr>
+        <td>{{data.dep_id}}</td>
+        <td>{{data.dep_name}}</td>
+        <td><button onclick="update_data('{% url 'update_deo' id=data.dep_id %}')">✏️</button></td>
+       <td><button onclick="confirmBeforeDelete('{% url 'delete_dep' id=data.dep_id %}')" >🗑</button>  
+    </td></tr> 
+    {%endfor%}
+</table>
+<script >
+     function confirmBeforeDelete(url){
+        var r = confirm("Are you sure you want to delete this data?")
+        if(r){
+            window.location.href = url
+        }
+    }
+    function update_data(url){
+        console.log(url)
+        var r = confirm("Are you sure you want to upadate this data?")
+        if(r){
+            window.location.href = url
+        }
+    }
+</script>
