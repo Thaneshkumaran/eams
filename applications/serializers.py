@@ -1,11 +1,32 @@
 from rest_framework import serializers
-from .models import *
+from .models import Department, JobTitle, Employee, DutyDuration, Leave, AttendanceReports
 
-class Attendance_Serializer(serializers.ModelSerializer):
+class DepartmentSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Attendance_Reports
-        fields = ["__all__"]
-class Attendance_Serializer(serializers.ModelSerializer):
+        model = Department
+        fields = '__all__'
+
+class JobTitleSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Attendance_Reports
-        fields = ["__all__"]
+        model = JobTitle
+        fields = '__all__'
+
+class EmployeeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Employee
+        fields = '__all__'
+
+class DutyDurationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DutyDuration
+        fields = '__all__'
+
+class LeaveSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Leave
+        fields = '__all__'
+
+class AttendanceReportsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AttendanceReports
+        fields = '__all__'

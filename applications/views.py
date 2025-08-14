@@ -1,20 +1,27 @@
-from django.shortcuts import render,HttpResponse
-from .form import *
-from .models import *
-from django.http import JsonResponse
-# Create your views here.
+from rest_framework import viewsets
+from .models import Department, JobTitle, Employee, DutyDuration, Leave, AttendanceReports
+from .serializers import *
 
-def form(request):
-    data={
-        "form" : AttendanceFrom(),
-        "name": "Attendance From",
-        "url" : "create_Attendance/"
-    }
-    return render(request,"./form.html",{"data":data})
+class DepartmentViewSet(viewsets.ModelViewSet):
+    queryset = Department.objects.all()
+    serializer_class = DepartmentSerializer
 
-def home(request):
-    return HttpResponse("helle thanesh")
-def create_Attendance(request):
-    if request== "POST":
-        pass
-    return JsonResponse({"success": True, "redirect_url": "/home"})
+class JobTitleViewSet(viewsets.ModelViewSet):
+    queryset = JobTitle.objects.all()
+    serializer_class = JobTitleSerializer
+
+class EmployeeViewSet(viewsets.ModelViewSet):
+    queryset = Employee.objects.all()
+    serializer_class = EmployeeSerializer
+
+class DutyDurationViewSet(viewsets.ModelViewSet):
+    queryset = DutyDuration.objects.all()
+    serializer_class = DutyDurationSerializer
+
+class LeaveViewSet(viewsets.ModelViewSet):
+    queryset = Leave.objects.all()
+    serializer_class = LeaveSerializer
+
+class AttendanceReportsViewSet(viewsets.ModelViewSet):
+    queryset = AttendanceReports.objects.all()
+    serializer_class = AttendanceReportsSerializer

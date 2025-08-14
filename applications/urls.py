@@ -1,10 +1,15 @@
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import *
 
-from django.urls import path
-from . import views
+router = DefaultRouter()
+router.register('departments', DepartmentViewSet)
+router.register('jobtitles', JobTitleViewSet)
+router.register('employees', EmployeeViewSet)
+router.register('dutyduration', DutyDurationViewSet)
+router.register('leave', LeaveViewSet)
+router.register('attendance', AttendanceReportsViewSet)
 
 urlpatterns = [
-    path('',views.form,name="index"),
-    path("home",views.home,name="home"),
-    path('create_Attendance/',views.create_Attendance,name="create_Attendance"),
+    path('api/', include(router.urls)),
 ]
-
