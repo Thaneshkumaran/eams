@@ -1,7 +1,13 @@
 from rest_framework import viewsets
-from .models import Department, JobTitle, Employee, DutyDuration, Leave, AttendanceReports
+from .models import Department, Gender, JobTitle, Employee, DutyDuration, Leave, AttendanceReports
 from .serializers import *
+from django.shortcuts import render
 
+def index(request):
+    return render(request,"index.html")
+class GenderViewSet(viewsets.ModelViewSet):
+    queryset = Gender.objects.all()
+    serializer_class = GenderSerializer
 class DepartmentViewSet(viewsets.ModelViewSet):
     queryset = Department.objects.all()
     serializer_class = DepartmentSerializer

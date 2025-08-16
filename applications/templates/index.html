@@ -1,0 +1,261 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Eams</title>
+<link rel="icon" href="data:,"> <!-- Prevents favicon 404 -->
+<style>
+body { font-family: Arial, sans-serif; margin: 0; }
+.navbar { background-color: #333; overflow: hidden; }
+.navbar a { float: left; display: block; color: #f2f2f2; text-align: center; padding: 14px 20px; text-decoration: none; }
+.navbar a:hover { background-color: #ddd; color: black; }
+.navbar a.active { background-color: #4CAF50; color: white; }
+h2 { text-align: center; margin-top: 20px; }
+form { width: 95%; margin: 20px auto; padding: 10px; border: 1px solid #ccc; display: none; }
+form input, form select, form textarea { margin: 5px; padding: 8px; width: calc(20% - 12px); }
+form button { padding: 5px 10px; margin: 5px 0; }
+table { border-collapse: collapse; width: 95%; margin: 20px auto; }
+th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+th { background-color: #4CAF50; color: white; }
+button { padding: 5px 8px; margin: 2px; }
+#message { text-align:center; font-weight:bold; color:red; }
+</style>
+</head>
+<body>
+
+<div class="navbar">
+    <a href="#" onclick="loadModel(this, 'employees')">Employees</a>
+    <a href="#" onclick="loadModel(this, 'departments')">Departments</a>
+    <a href="#" onclick="loadModel(this, 'gender')">Gender</a>
+    <a href="#" onclick="loadModel(this, 'jobtitles')">Job Titles</a>
+    <a href="#" onclick="loadModel(this, 'dutyduration')">Duty Duration</a>
+    <a href="#" onclick="loadModel(this, 'leave')">Leaves</a>
+    <a href="#" onclick="loadModel(this, 'attendance')">Attendance Reports</a>
+</div>
+
+<h2 id="title">Employees</h2>
+<div style="text-align:center; margin:10px;">
+    <button onclick="showAddForm()">Add Record</button>
+</div>
+
+<p id="message"></p>
+<form id="dataForm" onsubmit="submitForm(event)"></form>
+
+<table id="dataTable">
+    <thead></thead>
+    <tbody></tbody>
+</table>
+
+<script>
+let currentModel = "employees";
+let API_BASE = "/api/";
+let editingId = null;
+
+const foreignKeys = {
+    gender: "gender",
+    dept_ID: "departments",
+    employee_ID: "employees",
+    job_ID: "jobtitles",
+    duty_ID: "dutyduration",
+    leave_ID: "leave"
+};
+
+const fields = {
+    employees: ["fname","lname","gender","age","contact_add","emp_email","emp_pass"],
+    departments: ["department_name"],
+    gender: ["name"],
+    jobtitles: ["job_title","dept_ID"],
+    dutyduration: ["employee_ID","job_ID","duration","date"],
+    leave: ["employee_ID","job_ID","date"],
+    attendance: ["employee_ID","duty_ID","job_ID","leave_ID","total_labor","salary","date"]
+};
+
+// ---------- Load Model ----------
+function loadModel(element, model) {
+    document.querySelectorAll(".navbar a").forEach(a => a.classList.remove("active"));
+    element.classList.add("active");
+    currentModel = model;
+    document.getElementById("title").innerText = model.toUpperCase();
+    hideForm();
+    fetchData();
+}
+
+// ---------- Show Add Form ----------
+function showAddForm() {
+    editingId = null;
+    buildForm();
+    document.getElementById("dataForm").style.display = "block";
+    document.getElementById("message").textContent = "";
+}
+
+// ---------- Build Form ----------
+async function buildForm() {
+    let form = document.getElementById("dataForm");
+    form.innerHTML = "";
+
+    for (let f of fields[currentModel]) {
+        let input;
+        if (foreignKeys[f]) {
+            input = document.createElement("select");
+            input.name = f;
+            input.innerHTML = "<option value=''>--Select--</option>";
+            try {
+                let fkModel = foreignKeys[f];
+                let data = await fetch(API_BASE + fkModel + "/").then(res => res.json());
+                data.forEach(item => {
+                    let displayField;
+                    if (fkModel === "employees") displayField = item.fname + " " + item.lname;
+                    else if (fkModel === "departments") displayField = item.department_name;
+                    else if (fkModel === "jobtitles") displayField = item.job_title;
+                    else if (fkModel === "gender") displayField = item.name;
+                    else displayField = fkModel + " " + item.id;
+                    input.innerHTML += `<option value="${item.id}">${displayField}</option>`;
+                });
+            } catch (err) {
+                console.error("Error loading foreign key", f, err);
+            }
+        } else if (f === "contact_add") {
+            input = document.createElement("textarea");
+        } else {
+            input = document.createElement("input");
+            if (f.includes("date")) input.type = "date";
+            if (["age","duration","total_labor"].includes(f)) input.type = "number";
+            if (["salary"].includes(f)) input.type = "number";
+        }
+        input.name = f;
+        input.placeholder = f;
+        form.appendChild(input);
+    }
+
+    let btn = document.createElement("button");
+    btn.innerText = "Save";
+    form.appendChild(btn);
+}
+
+// ---------- Fetch Data ----------
+function fetchData() {
+    fetch(API_BASE + currentModel + "/")
+    .then(res => res.json())
+    .then(data => {
+        const tableHead = document.querySelector("#dataTable thead");
+        const tableBody = document.querySelector("#dataTable tbody");
+        tableHead.innerHTML = ""; tableBody.innerHTML = "";
+
+        if (data.length > 0) {
+            const headers = Object.keys(data[0]);
+            let headRow = "<tr>";
+            headers.forEach(key => headRow += `<th>${key}</th>`);
+            headRow += "<th>Actions</th></tr>";
+            tableHead.innerHTML = headRow;
+
+            data.forEach(item => {
+                let row = "<tr>";
+                headers.forEach(key => row += `<td>${item[key]}</td>`);
+                row += `<td>
+                            <button onclick='editRecord(${item[headers[0]]})'>Edit</button>
+                            <button onclick='deleteRecord(${item[headers[0]]})'>Delete</button>
+                        </td>`;
+                row += "</tr>";
+                tableBody.innerHTML += row;
+            });
+        } else {
+            tableBody.innerHTML = "<tr><td colspan='100%'>No data found</td></tr>";
+        }
+    }).catch(err => console.error(err));
+}
+
+// ---------- Submit Form ----------
+function submitForm(e) {
+    e.preventDefault();
+    let form = document.getElementById("dataForm");
+    let payload = {};
+
+    fields[currentModel].forEach(f => {
+        if (form[f]) {
+            let val = form[f].value;
+            if (foreignKeys[f]) payload[f] = val ? parseInt(val) : null;
+            else if (["age","duration","total_labor"].includes(f)) payload[f] = val ? parseInt(val) : null;
+            else if (["salary"].includes(f)) payload[f] = val ? parseFloat(val) : null;
+            else payload[f] = val || null;
+        }
+    });
+
+    let url = API_BASE + currentModel + (editingId ? "/" + editingId + "/" : "/");
+    let method = editingId ? "PUT" : "POST";
+
+    fetch(url, {
+        method: method,
+        headers: { "Content-Type": "application/json", "X-CSRFToken": getCookie('csrftoken') },
+        body: JSON.stringify(payload)
+    })
+    .then(res => res.json().then(data => ({ ok: res.ok, data })))
+    .then(result => {
+        if (!result.ok) {
+            document.getElementById("message").textContent = "❌ Error: " + JSON.stringify(result.data);
+            console.error("Save failed:", result.data);
+        } else {
+            document.getElementById("message").textContent = "✅ Saved successfully!";
+            fetchData();
+            form.reset();
+            hideForm();
+            editingId = null;
+        }
+    })
+    .catch(err => {
+        document.getElementById("message").textContent = "❌ Server error!";
+        console.error("Fetch error:", err);
+    });
+}
+
+// ---------- Edit Record ----------
+async function editRecord(id) {
+    let data = await fetch(API_BASE + currentModel + "/" + id + "/").then(res => res.json());
+    editingId = id;
+    await buildForm();
+    document.getElementById("dataForm").style.display = "block";
+    let form = document.getElementById("dataForm");
+    for (let key in data) if (form[key]) form[key].value = data[key];
+}
+
+// ---------- Delete Record ----------
+function deleteRecord(id) {
+    if (confirm("Delete this record?")) {
+        fetch(API_BASE + currentModel + "/" + id + "/", {
+            method: "DELETE",
+            headers: { 'X-CSRFToken': getCookie('csrftoken') }
+        }).then(() => fetchData());
+    }
+}
+
+// ---------- Hide Form ----------
+function hideForm() {
+    document.getElementById("dataForm").style.display = "none";
+}
+
+// ---------- CSRF ----------
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        let cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            cookie = cookie.trim();
+            if (cookie.startsWith(name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// ---------- Load Default ----------
+document.addEventListener("DOMContentLoaded", () => {
+    document.querySelector(".navbar a").classList.add("active");
+    loadModel(document.querySelector(".navbar a"), "employees");
+});
+</script>
+
+
+</body>
+</html>

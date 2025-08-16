@@ -1,7 +1,7 @@
 const API_URL = '/api/employees/';
 document.addEventListener('DOMContentLoaded', fetchEmployees);
 
-function create(url) {
+function create(API_URL) {
     let myForm = document.getElementById("employeeForm");
     let formData = new FormData(myForm);
 
@@ -20,10 +20,7 @@ function create(url) {
     .catch(error => console.error("Error submitting form:", error));
 }
 
-document.getElementById('employeeForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    create(API_URL);
-});
+
 
 function fetchEmployees() {
     fetch(API_URL)

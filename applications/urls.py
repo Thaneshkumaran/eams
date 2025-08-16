@@ -9,7 +9,9 @@ router.register('employees', EmployeeViewSet)
 router.register('dutyduration', DutyDurationViewSet)
 router.register('leave', LeaveViewSet)
 router.register('attendance', AttendanceReportsViewSet)
+router.register(r'gender', GenderViewSet)
 
 urlpatterns = [
     path('api/', include(router.urls)),
+    path("",index)
 ]
