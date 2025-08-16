@@ -20,29 +20,70 @@ th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
 th { background-color: #4CAF50; color: white; }
 button { padding: 5px 8px; margin: 2px; }
 #message { text-align:center; font-weight:bold; color:red; }
+.overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.6);
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Popup box */
+    .popup {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      width: 300px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .popup button {
+      margin-top: 15px;
+      padding: 8px 15px;
+      border: none;
+      background: #007BFF;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .popup button:hover {
+      background: #0056b3;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1); }
+    }
 </style>
 </head>
 <body>
 
 <div class="navbar">
-    <a href="#" onclick="loadModel(this, 'employees')">Employees</a>
-    <a href="#" onclick="loadModel(this, 'departments')">Departments</a>
-    <a href="#" onclick="loadModel(this, 'gender')">Gender</a>
-    <a href="#" onclick="loadModel(this, 'jobtitles')">Job Titles</a>
-    <a href="#" onclick="loadModel(this, 'dutyduration')">Duty Duration</a>
-    <a href="#" onclick="loadModel(this, 'leave')">Leaves</a>
-    <a href="#" onclick="loadModel(this, 'attendance')">Attendance Reports</a>
+    <a  onclick="loadModel(this, 'employees')">Employees</a>
+    <a  onclick="loadModel(this, 'departments')">Departments</a>
+    <a  onclick="loadModel(this, 'gender')">Gender</a>
+    <a onclick="loadModel(this, 'jobtitles')">Job Titles</a>
+    <a  onclick="loadModel(this, 'dutyduration')">Duty Duration</a>
+    <a onclick="loadModel(this, 'leave')">Leaves</a>
+    <a  onclick="loadModel(this, 'attendance')">Attendance Reports</a>
 </div>
 
 <h2 id="title">Employees</h2>
 <div style="text-align:center; margin:10px;">
-    <button onclick="showAddForm()">Add Record</button>
+    <button  clas ="btn" onclick="showAddForm()">Add Record</button>
 </div>
-
-<p id="message"></p>
-<form id="dataForm" onsubmit="submitForm(event)"></form>
-
-<table id="dataTable">
+<div class="overlay">
+    <p id="message"></p>
+    <form id="dataForm" onsubmit="submitForm(event)"></form>
+</div>
+<table id="dataTable" >
     <thead></thead>
     <tbody></tbody>
 </table>
